@@ -5,11 +5,23 @@ pygame.init()
 DISPLAY_WIDTH = 550
 DISPLAY_HEIGHT = 700
 
+# balls till now
+guesses = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+# pegs till now
+results = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+# current selection of balls
+current_guesses = [0, 0, 0, 0]
+# the specific all selected
+current_ball = 0
+# to maintain the number of turns till now
+turn = 0
+
 #         R    G    B
 WHITE = (255, 255, 255)
 RED   = (255,   0,   0)
 GREEN = (  0, 255,   0)
 BLACK = (  0,   0,   0)
+GRAY  = (169, 169, 169)
 
 # 0 denotes empty, 1-6 denote different colors
 ball = []
@@ -29,18 +41,8 @@ peg.append(pygame.image.load('Assets/peg_1.png'))
 peg.append(pygame.image.load('Assets/peg_2.png'))
 
 game_display = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
+pygame.display.set_caption("MASTERMIND");
 clock = pygame.time.Clock()
-
-# balls till now
-guesses = [[1, 2, 3, 4], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
-# pegs till now
-results = [[2, 2, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
-# current selection of balls
-current_guesses = [1, 2, 4, 6]
-# the specific all selected
-current_ball = 0
-# to maintain the number of turns till now
-turn = 0
 
 # computer choses randomly for player to enjoy
 answer = [1, 4, 2, 5]
@@ -77,18 +79,32 @@ def draw_board():
         game_display.blit(ball[i+1], (x, y))
         x += 50
 
+    pygame.draw.rect(game_display, GRAY, (350, 510, 120, 30))
+
 def click_ball(idx):
+    global current_ball
     current_ball = idx
+    print("click_ball")
+    print(idx)
 
 def click_slot(idx):
+    global current_ball
     if current_ball != 0:
-        current_guesses[idx] = current_ball
+        current_guesses[idx-1] = current_ball
         current_ball = 0
+        print("click_slot")
+        print(idx)
 
 def click_submit():
+    global current_guesses
+    global guesses
+    global results
+    global turn
+    global answer
+    global current_ball
     black_pegs = 0
-    white_peg = 0
-    freq_temp = [0, 0, 0, 0, 0, 0, 0 ]
+    white_pegs = 0
+    freq_temp = [0, 0, 0, 0, 0, 0, 0]
     for i in range(len(current_guesses)):
         freq_temp[current_guesses[i]] += 1;
         if current_guesses[i] == 0:
@@ -109,11 +125,11 @@ def click_submit():
 
     # updating results (status of pegs)
     j = 0
-    while black_pegs:
+    while black_pegs != 0:
         results[turn][j] = 2
         black_pegs -= 1
         j += 1
-    while white_pegs:
+    while white_pegs != 0:
         results[turn][j] = 1
         white_pegs -= 1
         j += 1
@@ -122,15 +138,47 @@ def click_submit():
     current_ball = 0
     current_guesses = [0, 0, 0, 0]
 
+def mouse_click(mx, my):
+
+    if my >= 510 and my <= 540 and mx >= 350 and mx <= 470:
+        click_submit()
+
+    # my is 500 (click_slot)
+    elif my >= 500 and my <= 550:
+        x = 50
+        for i in range(1, 5):
+            if mx >= x and mx <= x+50:
+                click_slot(i)
+                return
+            x += 50
+
+    # my is 600 (click_ball)
+    elif my >= 600 and my <= 650:
+        x = 50
+        for i in range(1, 7):
+            if mx >= x and mx <= x+50:
+                click_ball(i)
+                return
+            x += 50
+
 
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
+        if event.type == pygame.MOUSEBUTTONUP:
+            mx, my = pygame.mouse.get_pos()
+            print(mx)
+            print(my)
+            mouse_click(mx, my)
+
     game_display.fill(WHITE)
     draw_board()
     pygame.display.flip()
     clock.tick(60)
+
+
+
 
 
 
