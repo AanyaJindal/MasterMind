@@ -46,7 +46,7 @@ turn = 0
 answer = [1, 4, 2, 5]
 freq_ans = [0, 0, 0, 0, 0, 0, 0]
 for i in range(len(answer)):
-    freq_ans[answer[i]]++
+    freq_ans[answer[i]] += 1
 
 def draw_board():
     y = 50
@@ -100,8 +100,8 @@ def click_submit():
         white_pegs += min(freq_temp[i], freq_ans[i])
     white_pegs -= black_pegs
 
-    if black_pegs == 4:
-        # display "WIN"
+    # if black_pegs == 4:
+    #     # display "WIN"
 
     # updating current_guesses (status of balls)
     for i in range(len(current_guesses)):
