@@ -71,8 +71,8 @@ def init():
     for i in range(len(answer)):
         answer[i] = random.randint(1, 6)
     random.shuffle(answer)
-    for i in range(len(answer)):
-        print(answer[i])
+    # for i in range(len(answer)):
+        # print(answer[i])
     freq_ans = [0, 0, 0, 0, 0, 0, 0]
     for i in range(len(answer)):
         freq_ans[answer[i]] += 1
@@ -155,16 +155,16 @@ def draw_result():
 def click_ball(idx):
     global current_ball
     current_ball = idx
-    print("click_ball")
-    print(idx)
+    # print("click_ball")
+    # print(idx)
 
 def click_slot(idx):
     global current_ball
     if current_ball != 0:
         current_guesses[idx-1] = current_ball
         current_ball = 0
-        print("click_slot")
-        print(idx)
+        # print("click_slot")
+        # print(idx)
 
 def click_submit():
     global current_guesses
@@ -217,7 +217,7 @@ def mouse_click(mx, my):
 
     # handle new game click
     if my >= 700 and my <= 730 and mx >= 410 and mx <= 530:
-        print("new game")
+        # print("new game")
         init()
         return
 
@@ -253,8 +253,8 @@ while True:
             pygame.quit()
         if event.type == pygame.MOUSEBUTTONUP:
             mx, my = pygame.mouse.get_pos()
-            print(mx)
-            print(my)
+            # print(mx)
+            # print(my)
             mouse_click(mx, my)
 
     game_display.fill(WHITE)
