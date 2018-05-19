@@ -1,6 +1,7 @@
 import pygame
 
 pygame.init()
+pygame.font.init()
 
 DISPLAY_WIDTH = 550
 DISPLAY_HEIGHT = 700
@@ -8,13 +9,14 @@ DISPLAY_HEIGHT = 700
 # balls till now
 guesses = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
 # pegs till now
-results = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+results = [[-1, -1, -1, -1], [-1, -1, -1, -1], [-1, -1, -1, -1], [-1, -1, -1, -1], [-1, -1, -1, -1], [-1, -1, -1, -1], [-1, -1, -1, -1], [-1, -1, -1, -1]]
 # current selection of balls
 current_guesses = [0, 0, 0, 0]
 # the specific all selected
 current_ball = 0
 # to maintain the number of turns till now
 turn = 0
+user_won = False
 
 #         R    G    B
 WHITE = (255, 255, 255)
@@ -41,6 +43,7 @@ peg.append(pygame.image.load('Assets/peg_1.png'))
 peg.append(pygame.image.load('Assets/peg_2.png'))
 
 game_display = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
+font_display = pygame.font.SysFont('comicsansms', 25)
 pygame.display.set_caption("MASTERMIND");
 clock = pygame.time.Clock()
 
@@ -61,25 +64,64 @@ def draw_board():
             x += 50
         x += 100
         for j in range(len(results[i])):
-            game_display.blit(peg[results[i][j]], (x, y))
+            if results[i][j] != -1:
+                game_display.blit(peg[results[i][j]], (x, y))
             x += 30
         y += 50
     y += 50
     x = 50
 
-    # for filling the slots
-    for i in range(len(current_guesses)):
-        game_display.blit(ball[current_guesses[i]], (x, y))
-        x += 50
-    y += 100
-    x = 50
+    if user_won == True or turn == 8:
+        # for filling the correct answer
+        pygame.draw.rect(game_display, GRAY, (x-5, y-5, 350, 55))
+        for i in range(len(answer)):
+            game_display.blit(ball[answer[i]], (x, y))
+            x += 50
+        textsurface = font_display.render("ACTUAL CODE", True, (0, 0, 0))
+        game_display.blit(textsurface, (x+10, y+15))
+        y += 70
+        x = 50
+        if user_won:
+            textsurface = font_display.render("Congratulations! You broke the code!", True, (0, 0, 0))
+        elif turn == 8:
+            textsurface = font_display.render("OOPS! You didn't get the code! Try again!", True, (0, 0, 0))
+        game_display.blit(textsurface, (x, y))
 
-    # for filling the balls of selection
-    for i in range(6):
-        game_display.blit(ball[i+1], (x, y))
+    else:
+       # for filling the slots
+        for i in range(len(current_guesses)):
+            game_display.blit(ball[current_guesses[i]], (x, y))
+            x += 50
+        y += 100
+        x = 50
+
+        # for filling the balls of selection
+        for i in range(6):
+            game_display.blit(ball[i+1], (x, y))
+            x += 50
+
+        pygame.draw.rect(game_display, GRAY, (350, 510, 120, 30))
+        textsurface = font_display.render("Submit", True, (0, 0, 0))
+        game_display.blit(textsurface, (380, 517)) 
+
+# function which can be used to display result on new screen
+def draw_result():
+    game_display.fill(WHITE)
+
+    textsurface = font_display.render("The CODE was:", True, (0, 0, 0))
+    game_display.blit(textsurface, (50, 50))
+
+    x = 200
+    y = 50
+    for i in range(len(answer)):
+        game_display.blit(ball[answer[i]], (x, y))
         x += 50
 
-    pygame.draw.rect(game_display, GRAY, (350, 510, 120, 30))
+    if user_won:
+        textsurface = font_display.render("Congratulations! You broke the code!", True, (0, 0, 0))
+    elif turn == 8:
+        textsurface = font_display.render("OOPS! You didn't get the code! Try again!", True, (0, 0, 0))
+    game_display.blit(textsurface, (50, 300))
 
 def click_ball(idx):
     global current_ball
@@ -102,6 +144,7 @@ def click_submit():
     global turn
     global answer
     global current_ball
+    global user_won
     black_pegs = 0
     white_pegs = 0
     freq_temp = [0, 0, 0, 0, 0, 0, 0]
@@ -116,8 +159,8 @@ def click_submit():
         white_pegs += min(freq_temp[i], freq_ans[i])
     white_pegs -= black_pegs
 
-    # if black_pegs == 4:
-    #     # display "WIN"
+    if black_pegs == 4:
+        user_won = True
 
     # updating current_guesses (status of balls)
     for i in range(len(current_guesses)):
@@ -133,6 +176,9 @@ def click_submit():
         results[turn][j] = 1
         white_pegs -= 1
         j += 1
+    while j < 4:
+        results[turn][j] = 0
+        j += 1
 
     turn += 1
     current_ball = 0
@@ -140,6 +186,12 @@ def click_submit():
 
 def mouse_click(mx, my):
 
+    # handle new game click
+
+    # check if game is over
+    if user_won == True or turn == 8:
+        return
+        
     if my >= 510 and my <= 540 and mx >= 350 and mx <= 470:
         click_submit()
 
@@ -174,8 +226,15 @@ while True:
 
     game_display.fill(WHITE)
     draw_board()
+    # if turn < 8 and user_won == False:
+    #     draw_board()
+    # else:
+    #     draw_result()
     pygame.display.flip()
     clock.tick(60)
+
+
+
 
 
 
