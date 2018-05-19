@@ -1,10 +1,11 @@
 import pygame
+import random
 
 pygame.init()
 pygame.font.init()
 
 DISPLAY_WIDTH = 550
-DISPLAY_HEIGHT = 700
+DISPLAY_HEIGHT = 750
 
 # balls till now
 guesses = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
@@ -48,10 +49,33 @@ pygame.display.set_caption("MASTERMIND");
 clock = pygame.time.Clock()
 
 # computer choses randomly for player to enjoy
-answer = [1, 4, 2, 5]
+answer = [0, 0, 0, 0]
 freq_ans = [0, 0, 0, 0, 0, 0, 0]
-for i in range(len(answer)):
-    freq_ans[answer[i]] += 1
+
+def init():
+    global guesses
+    global results
+    global current_guesses
+    global current_ball
+    global turn
+    global user_won
+    global answer
+    global freq_ans
+    guesses = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+    results = [[-1, -1, -1, -1], [-1, -1, -1, -1], [-1, -1, -1, -1], [-1, -1, -1, -1], [-1, -1, -1, -1], [-1, -1, -1, -1], [-1, -1, -1, -1], [-1, -1, -1, -1]]
+    current_guesses = [0, 0, 0, 0]
+    current_ball = 0
+    turn = 0
+    user_won = False
+    # chose answer randomly
+    for i in range(len(answer)):
+        answer[i] = random.randint(1, 6)
+    random.shuffle(answer)
+    for i in range(len(answer)):
+        print(answer[i])
+    freq_ans = [0, 0, 0, 0, 0, 0, 0]
+    for i in range(len(answer)):
+        freq_ans[answer[i]] += 1
 
 def draw_board():
     y = 50
@@ -104,7 +128,12 @@ def draw_board():
         textsurface = font_display.render("Submit", True, (0, 0, 0))
         game_display.blit(textsurface, (380, 517)) 
 
+    pygame.draw.rect(game_display, GRAY, (410, 700, 120, 30))
+    textsurface = font_display.render("New Game", True, (0, 0, 0))
+    game_display.blit(textsurface, (425, 707)) 
+
 # function which can be used to display result on new screen
+# has not been used in present implementation
 def draw_result():
     game_display.fill(WHITE)
 
@@ -187,11 +216,15 @@ def click_submit():
 def mouse_click(mx, my):
 
     # handle new game click
+    if my >= 700 and my <= 730 and mx >= 410 and mx <= 530:
+        print("new game")
+        init()
+        return
 
     # check if game is over
     if user_won == True or turn == 8:
         return
-        
+
     if my >= 510 and my <= 540 and mx >= 350 and mx <= 470:
         click_submit()
 
@@ -213,7 +246,7 @@ def mouse_click(mx, my):
                 return
             x += 50
 
-
+init()
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -226,10 +259,6 @@ while True:
 
     game_display.fill(WHITE)
     draw_board()
-    # if turn < 8 and user_won == False:
-    #     draw_board()
-    # else:
-    #     draw_result()
     pygame.display.flip()
     clock.tick(60)
 
